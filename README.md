@@ -111,7 +111,7 @@ Create a new payment.
 
 
 ### Ideia de Arquitetura
-![](https://github.com/laisevn/cybermen-api/blob/master/Payment_Diagram.png)
+![](https://github.com/laisevn/cybermen-api/blob/main/Payment_Diagram.png)
 
 
 ### Melhorias
