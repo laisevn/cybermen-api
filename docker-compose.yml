@@ -1,0 +1,71 @@
+version: '3.4'
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx-container
+    ports:
+      - 8080:80
+    volumes:
+      - .:/var/www/html/payment_api/
+      - ./docker/default.conf:/etc/nginx/conf.d/default.conf:ro
+    links:
+      - mysql
+      - php-fpm
+
+  php-fpm:
+    build: ./docker/
+    container_name: php-container
+    environment:
+      - PHP_FPM_ENABLE=1
+      - PHP_FPM_SERVER_ADDR=php
+      - PHP_FPM_SERVER_PORT=9000
+      - PHP_FPM_TIMEOUT=${HTTPD_TIMEOUT_TO_PHP_FPM:-180}
+      - DB_CONNECTION=mysql
+      - DB_HOST=localhost
+      - DB_DATABASE=payment_api
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+      - API_NAME=paypal_api_test
+      - API_VERSION=1.0
+
+    volumes:
+      - .:/var/www/html/payment_api/
+      - ./docker/www.conf:/etc/php7/fpm/pool.d/www.conf
+    ports:
+      - 9000:9000
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-container
+    cap_add:
+      - SYS_NICE
+    ports:
+      - 3307:3306
+    environment:
+      - MYSQL_DATABASE=payment_api
+      - MYSQL_USER=root  
+      - MYSQL_PASSWORD=root
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - data:/var/lib/mysql
+    security_opt:
+      - seccomp:unconfined
+    
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: pma-container
+    ports:
+      - 8081:80
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+      - PMA_PORT=3306
+    links:
+      - mysql
+
+volumes:
+  data:
